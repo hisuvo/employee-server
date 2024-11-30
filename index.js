@@ -12,7 +12,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.EM_NAM}:${process.env.EM_PASS}@cluster0.aiyi0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-console.log(uri)
+// console.log(uri)
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -24,6 +24,7 @@ const client = new MongoClient(uri, {
 });
 
 const employeeCollection = client.db("employeesDB").collection("empoyees")
+const employeeAuthCollection = client.db("employeesauthDB").collection("employeesauth")
 
 async function run() {
   try {
@@ -45,9 +46,9 @@ async function run() {
 
     app.post('/employees', async(req, res) =>{
       const employee = req.body
-      console.log(employee)
+      // console.log(employee)
       const result = await employeeCollection.insertOne(employee)
-      console.log( result)
+      // console.log( result)
     })
 
     app.put('/employees/:id', async(req, res)=>{
@@ -58,15 +59,48 @@ async function run() {
         $set: req.body
       }
       const result = await employeeCollection.updateOne(query, employee, options)
-      console.log(result)
+      // console.log(result)
     })
 
     app.delete('/employees/:id', async(req, res)=>{
       const id = req.params.id
       const query = {_id: new ObjectId(id)}
       const result = await employeeCollection.deleteOne(query)
+      // console.log(result)
+    })
+
+
+    //-----------------------------------------
+
+
+    //  Authentication user information Api
+
+    app.get('/employeesauth', async(req, res)=> {
+      const cursor1 = employeeAuthCollection.find()
+      const result = await cursor1.toArray()
+      res.send(result)
+    })
+
+    app.get('/employeesauth/:id', async(req, res)=> {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await employeeAuthCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.post('/employeesauth', async(req, res)=>{
+      const newUser = req.body
+      const result = await employeeAuthCollection.insertOne(newUser)
+      res.send(result)
+    })
+
+    app.delete('/employeesauth/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await employeeAuthCollection.deleteOne(query)
       console.log(result)
     })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -82,3 +116,6 @@ run().catch(console.dir);
 app.listen(port, () => {
   console.log("Employee server PORT", port);
 });
+
+
+
