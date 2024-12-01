@@ -94,6 +94,20 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/employeesauth', async(req, res) => {
+      const email = req.body.email
+      const filter = {email}
+      const updatedoc = {
+        $set:{
+          lastSingInTime: req.body?.lastSingInTime
+        }
+      }
+      const result = await employeeAuthCollection.updateOne(filter, updatedoc)
+      res.send(result)
+      console.log(result)
+
+    })
+
     app.delete('/employeesauth/:id', async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
